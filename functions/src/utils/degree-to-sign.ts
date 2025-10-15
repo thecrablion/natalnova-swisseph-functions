@@ -41,5 +41,5 @@ export function degreeToSign(longitude: number): SignPosition {
  * Formats position as string (e.g., "15° Aries 30'")
  */
 export function formatPosition(position: SignPosition): string {
-  return `${position.degrees}° ${position.sign} ${position.minutes}'`;
+  return `${position.sign} ${position.degrees}° ${position.minutes}'`;
 }
