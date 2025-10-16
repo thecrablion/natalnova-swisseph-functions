@@ -150,7 +150,6 @@ function calculatePlanetaryPositions(
       console.error(`Error calculating ${name}:`, result.error);
       continue;
     }
-
     // Fix: Asegurar que result tiene longitude
     if (!('longitude' in result)) {
       console.error(`No longitude data for ${name}`);
