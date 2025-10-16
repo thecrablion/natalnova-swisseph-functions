@@ -1,5 +1,5 @@
 import {onCall, HttpsError} from 'firebase-functions/v2/https';
-import {Storage} from '@google-cloud/storage';
+import { getStorage as getAdminStorage } from 'firebase-admin/storage';
 import * as swisseph from 'swisseph';
 import {Client} from '@googlemaps/google-maps-services-js';
 import * as path from 'path';
@@ -16,11 +16,16 @@ import {
 import {degreeToSign, formatPosition} from './utils/degree-to-sign';
 import {getHouse} from './utils/get-house';
 import {calculateAspects} from './utils/calculate-aspects';
+import { initializeApp } from 'firebase-admin/app';
+import { getApps } from 'firebase-admin/app';
+
+if (!getApps().length) {
+  initializeApp();
+}
 
 const googleMapsApiKey = defineSecret('GOOGLE_MAPS_API_KEY');
 
 const gmapsClient = new Client({});
-const storage = new Storage();
 
 const CELESTIAL_BODIES = {
   Sun: swisseph.SE_SUN,
@@ -51,18 +56,10 @@ async function ensureEphemerisFiles(): Promise<void> {
   console.log('Downloading ephemeris files...');
   fs.mkdirSync(EPHEMERIS_CACHE_DIR, {recursive: true});
 
-  // Fix: Validar que FIREBASE_STORAGE_BUCKET existe
-  const bucketName = process.env.FIREBASE_STORAGE_BUCKET;
-  if (!bucketName) {
-    throw new HttpsError(
-      'failed-precondition',
-      'FIREBASE_STORAGE_BUCKET environment variable is not set'
-    );
-  }
-
-  const bucket = storage.bucket(bucketName);
-
   try {
+    // Usar Firebase Admin SDK en vez de @google-cloud/storage
+    const bucket = getAdminStorage().bucket();
+
     const [files] = await bucket.getFiles({prefix: 'ephe/'});
 
     await Promise.all(
